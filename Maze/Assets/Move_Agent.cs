@@ -10,6 +10,7 @@ public class Move_Agent : MonoBehaviour {
     public GameObject player;
     Vector3 chacePos = Vector3.zero;
     NavMeshAgent agent;
+    public GameObject failObj;
 
     void Start()
     {
@@ -26,12 +27,13 @@ public class Move_Agent : MonoBehaviour {
             {
                 patrol();
             }
-
+            Debug.Log(Mathf.Abs(Vector3.Angle(this.transform.forward, player.transform.position - this.transform.position)));
             //if near the player
-            if(Vector3.Distance(this.transform.position, player.transform.position) < 1f || Vector3.Distance(this.transform.position, player.transform.position) < 7f && Mathf.Abs(Vector3.Angle(this.transform.forward,this.transform.position-player.transform.position)) < 70f )
+            if(Vector3.Distance(this.transform.position, player.transform.position) < 1f || (Vector3.Distance(this.transform.position, player.transform.position) < 7f && Mathf.Abs(Vector3.Angle(this.transform.forward,player.transform.position - this.transform.position)) < 30f ))
             {
                 state = 1;
                 chasePlayer();
+                this.GetComponent<AudioSource>().Play();
             }
         }
         else if(state == 1)
@@ -41,11 +43,22 @@ public class Move_Agent : MonoBehaviour {
             {
                 state = 0;
                 patrol();
+                this.GetComponent<AudioSource>().Stop();
             }
             else
             {
                 chasePlayer();
             }
+        }
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "Player")
+        {
+            GameObject instance = Instantiate(Resources.Load("Fail Audio", typeof(GameObject))) as GameObject;
+            failObj.SetActive(true);
+            Destroy(this.gameObject);
         }
     }
 
